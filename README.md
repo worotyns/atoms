@@ -71,77 +71,75 @@ Serializers:
 ##### Simple structure - one file
 
 ```ts
-	const {persist, restore} = createMemory();
+const {persist, restore} = createMemory();
 
-    // Define your model
-	class Simple extends Atom<MySample> {
+// Define your model
+class Simple extends Atom<MySample> {
 
-		public readonly name: string = 'example';
-		public readonly age: number = 33;
+    public readonly name: string = 'example';
+    public readonly age: number = 33;
 
-        public sayNameAndAge() {
-            return `${this.name} is ${age} yo`
-        }
+    public sayNameAndAge() {
+        return `${this.name} is ${age} yo`
+    }
 
-		static deserialize(value: PropertiesOnly<MySample>): MySample {
-			return Object.assign(
-                new MySample(), 
-                Atom.parse<MySample>(value)
-            );
-		}
-	}
+    static deserialize(value: PropertiesOnly<MySample>): MySample {
+        return Object.assign(
+            new MySample(), 
+            Atom.parse<MySample>(value)
+        );
+    }
+}
 
-    // Create instance
-    const mySample = new MySample();
+// Create instance
+const mySample = new MySample();
 
-    // Save
-	await persist(mySample);
-	
-    // Restore from FS
-    const restored = await restore(mySample.identity, MySample);
+// Save
+await persist(mySample);
 
+// Restore from FS
+const restored = await restore(mySample.identity, MySample);
 ```
 
 ##### Nested sturctures (each of structure is persisted in separate file)
 ```ts
-	const {persist, restore} = createMemory();
+const {persist, restore} = createMemory();
 
-	class MySample extends Atom<MySample> {
+class MySample extends Atom<MySample> {
 
-		public readonly name: string = 'example';
-		public readonly age: number = 33;
+    public readonly name: string = 'example';
+    public readonly age: number = 33;
 
-        public nested: MySecondClass = new MySecondClass();
+    public nested: MySecondClass = new MySecondClass();
 
-		static deserialize(value: PropertiesOnly<MySample>): MySample {
-			const temporary = Atom.parse<MySample>(value);
-			const newSample = new MySample();
+    static deserialize(value: PropertiesOnly<MySample>): MySample {
+        const temporary = Atom.parse<MySample>(value);
+        const newSample = new MySample();
 
-			Object.assign(newSample, temporary, {
-				nested: MySecondClass.deserialize(temporary.nested),
-			});
+        Object.assign(newSample, temporary, {
+            nested: MySecondClass.deserialize(temporary.nested),
+        });
 
-			return newSample;
-		}
-	}
+        return newSample;
+    }
+}
 
-	class MySecondClass extends Atom<MySecondClass> {
+class MySecondClass extends Atom<MySecondClass> {
 
-		public collection: Array<number> = [1, 2, 3, 4];
+    public collection: Array<number> = [1, 2, 3, 4];
 
-		static deserialize(
-			value: PropertiesOnly<MySecondClass>,
-		): MySecondClass {
-			const temporary = Atom.parse(value);
-			const newSample = new MySecondClass();
-			Object.assign(newSample, temporary);
-			return newSample;
-		}
-	}
+    static deserialize(
+        value: PropertiesOnly<MySecondClass>,
+    ): MySecondClass {
+        const temporary = Atom.parse(value);
+        const newSample = new MySecondClass();
+        Object.assign(newSample, temporary);
+        return newSample;
+    }
+}
 
-	const mySample = new MySample();
+const mySample = new MySample();
 
-	await persist(mySample);
-	const restored = await restore(mySample.identity, MySample);
-
+await persist(mySample);
+const restored = await restore(mySample.identity, MySample);
 ```
