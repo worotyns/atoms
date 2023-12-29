@@ -1,5 +1,4 @@
-import { PropertiesOnly } from 'https://deno.land/x/atoms@0.0.1/interfaces.ts';
-import { Atom, createFs } from 'https://deno.land/x/atoms@0.0.1/mod.ts';
+import { Atom, createFs, PropertiesOnly } from 'https://deno.land/x/atoms@0.0.2/mod.ts';
 
 const {persist, restore} = createFs('./data');
 
