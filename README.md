@@ -29,7 +29,7 @@ class Wallet {
 
 And then when I need to use it i just add `extends Atom {` to class implementation and write deserializer. If my data grows and object data goes to be more complex. I can wrap nested properties class with Atom also, and store in separated files on fs.
 
-So finally i have:
+So finally you have:
 
 ```ts
 class Wallet extends Atom<Wallet> {
@@ -56,7 +56,7 @@ class Wallet extends Atom<Wallet> {
 }
 ```
 
-## What is included?
+### What is included?
 Drivers:
  - memory
  - file system
@@ -66,7 +66,7 @@ Drivers:
 Serializers:
  - json
 
-#### Example code:
+### Example codes:
 
 ##### Simple structure - one file
 
@@ -102,6 +102,7 @@ const restored = await restore(mySample.identity, MySample);
 ```
 
 ##### Nested sturctures (each of structure is persisted in separate file)
+
 ```ts
 const {persist, restore} = createMemory();
 
@@ -143,3 +144,5 @@ const mySample = new MySample();
 await persist(mySample);
 const restored = await restore(mySample.identity, MySample);
 ```
+
+Thats all
