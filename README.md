@@ -71,10 +71,12 @@ Serializers:
 ##### Simple structure - one file
 
 ```ts
+import { Atom, createFs, createMemory } from 'https://deno.land/x/atoms@0.0.1/mod.ts';
+
 const {persist, restore} = createMemory();
 
 // Define your model
-class Simple extends Atom<MySample> {
+class Simple extends Atom<Simple> {
 
     public readonly name: string = 'example';
     public readonly age: number = 33;
@@ -83,27 +85,29 @@ class Simple extends Atom<MySample> {
         return `${this.name} is ${age} yo`
     }
 
-    static deserialize(value: PropertiesOnly<MySample>): MySample {
+    static deserialize(value: PropertiesOnly<Simple>): Simple {
         return Object.assign(
-            new MySample(), 
-            Atom.parse<MySample>(value)
+            new Simple(), 
+            Atom.parse<Simple>(value)
         );
     }
 }
 
 // Create instance
-const mySample = new MySample();
+const simple = new Simple();
 
 // Save
-await persist(mySample);
+await persist(simple);
 
 // Restore from FS
-const restored = await restore(mySample.identity, MySample);
+const restored = await restore(simple.identity, Simple);
 ```
 
 ##### Nested sturctures (each of structure is persisted in separate file)
 
 ```ts
+import { Atom, createFs, createMemory } from 'https://deno.land/x/atoms@0.0.1/mod.ts';
+
 const {persist, restore} = createMemory();
 
 class MySample extends Atom<MySample> {
