@@ -70,5 +70,5 @@ console.log(restored.balance.value) // 200
 try {
     restored.debit(new Amount(350)); // throws
 } catch(error) {
-    console.log(error.message);
+    console.log(error.message); // throws business logic error
 }

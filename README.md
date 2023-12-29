@@ -10,17 +10,18 @@ I can persist my state or restore when I need, without any databases. In FS i ca
 
 Imagine that you can write wallet like:
 ```ts
-class Wallet {
-    private readonly balance: Amount = Amount.zero()
+
+class Wallet extends {
+    public readonly balance: Amount = Amount.zero()
 
     debit(amount: Amount) {
+        if (this.balance.clone().subtract(amount).isUnderZero()) {
+            throw new Error('Cannot credit this wallet, you don\'t have efficient amount')
+        }
         this.balance.subtract(amount)
     }
 
     credit(amount: Amount) {
-        if (this.balance.clone().add(amount).isUnderZero()) {
-            throw new Error('Cannot credit this wallet, you don\'t have efficient amount')
-        }
         this.balance.add(amount)
     }
 }
@@ -33,24 +34,26 @@ So finally you have:
 
 ```ts
 class Wallet extends Atom<Wallet> {
-
-    private readonly balance: Amount = Amount.zero()
+    public readonly balance: Amount = Amount.zero()
 
     debit(amount: Amount) {
+        if (this.balance.clone().subtract(amount).isUnderZero()) {
+            throw new Error('Cannot credit this wallet, you don\'t have efficient amount')
+        }
         this.balance.subtract(amount)
     }
 
     credit(amount: Amount) {
-        if (this.balance.clone().add(amount).isUnderZero()) {
-            throw new Error('Cannot credit this wallet, you don\'t have efficient amount')
-        }
         this.balance.add(amount)
     }
 
     static deserialize(value: PropertiesOnly<Wallet>) {
+        const parsed = Atom.parse<Wallet>(value);
+        
         return Object.assign(
             new Wallet(), 
-            Atom.parse<Wallet>(value)
+            parsed,
+            {balance: Amount.zero().add(parsed.balance)}
         );
     }
 }
