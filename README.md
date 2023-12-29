@@ -1,155 +1,88 @@
-# Concept
+# Atoms
 
-## What?
-Simple as objects and easy to prototype micro "framework".
-Just two methods: *restore* and *persist* and one interface to implements *IAtom*.
+## Overview
 
-## Why?
-I need to write small programs without complexity. I need to declare one class, and interact with it.
-I can persist my state or restore when I need, without any databases. In FS i can preview my data and query with `jq` or similar tools.
+Atoms is a simple and lightweight micro "framework" designed for easy prototyping and interaction with objects. It consists of just two methods, _restore_ and _persist_, and an interface to implement _IAtom_.
 
-Imagine that you can write wallet like:
-```ts
+## Features
 
-class Wallet extends {
-    public readonly balance: Amount = Amount.zero()
+- **Simplicity:** Define your classes with just two methods, making it easy to create small programs without unnecessary complexity.
 
-    debit(amount: Amount) {
-        if (this.balance.clone().subtract(amount).isUnderZero()) {
-            throw new Error('Cannot credit this wallet, you don\'t have efficient amount')
-        }
-        this.balance.subtract(amount)
-    }
+- **Persistence:** Easily persist and restore the state of your objects without the need for databases. Use the file system to preview data and query with tools like `jq` or similar.
 
-    credit(amount: Amount) {
-        this.balance.add(amount)
-    }
-}
+- **Extensibility:** Implement the _IAtom_ interface by extending the _Atom_ class to enable seamless serialization and deserialization.
 
-```
+- **Drivers:** Includes drivers for memory, file system, object storage (in progress), and Deno KV storage (in progress).
 
-And then when I need to use it i just add `extends Atom {` to class implementation and write deserializer. If my data grows and object data goes to be more complex. I can wrap nested properties class with Atom also, and store in separated files on fs.
+- **Serializers:** Currently supports JSON serialization.
 
-So finally you have:
+## Example Codes
 
-```ts
-class Wallet extends Atom<Wallet> {
-    public readonly balance: Amount = Amount.zero()
+### Simple Structure (One File)
 
-    debit(amount: Amount) {
-        if (this.balance.clone().subtract(amount).isUnderZero()) {
-            throw new Error('Cannot credit this wallet, you don\'t have efficient amount')
-        }
-        this.balance.subtract(amount)
-    }
+```typescript
+import { Atom, createFs } from 'https://deno.land/x/atoms/mod.ts';
 
-    credit(amount: Amount) {
-        this.balance.add(amount)
-    }
+const { persist, restore } = createFs('./tmp');
 
-    static deserialize(value: PropertiesOnly<Wallet>) {
-        const parsed = Atom.parse<Wallet>(value);
-        
-        return Object.assign(
-            new Wallet(), 
-            parsed,
-            {balance: Amount.zero().add(parsed.balance)}
-        );
-    }
-}
-```
-
-### What is included?
-Drivers:
- - memory
- - file system
- - object storage (inprogress)
- - deno kv (in progress)
-
-Serializers:
- - json
-
-### Example codes:
-
-##### Simple structure - one file
-
-```ts
-import { Atom, createFs, createMemory } from 'https://deno.land/x/atoms@0.0.1/mod.ts';
-
-const {persist, restore} = createMemory();
-
-// Define your model
 class Simple extends Atom<Simple> {
+	public readonly name: string = 'example';
+	public readonly age: number = 33;
 
-    public readonly name: string = 'example';
-    public readonly age: number = 33;
+	sayNameAndAge() {
+		return `${this.name} is ${this.age} yo`;
+	}
 
-    public sayNameAndAge() {
-        return `${this.name} is ${age} yo`
-    }
-
-    static deserialize(value: PropertiesOnly<Simple>): Simple {
-        return Object.assign(
-            new Simple(), 
-            Atom.parse<Simple>(value)
-        );
-    }
+	static deserialize(value: PropertiesOnly<Simple>): Simple {
+		return Object.assign(
+			new Simple(),
+			Atom.parse<Simple>(value),
+		);
+	}
 }
 
-// Create instance
 const simple = new Simple();
-
-// Save
 await persist(simple);
-
-// Restore from FS
 const restored = await restore(simple.identity, Simple);
 ```
 
-##### Nested sturctures (each of structure is persisted in separate file)
+## Nested structure (multiple files on save)
 
 ```ts
-import { Atom, createFs, createMemory } from 'https://deno.land/x/atoms@0.0.1/mod.ts';
+import { Atom, createFs } from 'https://deno.land/x/atoms/mod.ts';
 
-const {persist, restore} = createMemory();
+const { persist, restore } = createFs('./tmp');
 
 class MySample extends Atom<MySample> {
+	public readonly name: string = 'example';
+	public readonly age: number = 33;
+	public nested: MySecondClass = new MySecondClass();
 
-    public readonly name: string = 'example';
-    public readonly age: number = 33;
+	static deserialize(value: PropertiesOnly<MySample>): MySample {
+		const temporary = Atom.parse<MySample>(value);
+		const newSample = new MySample();
 
-    public nested: MySecondClass = new MySecondClass();
+		Object.assign(newSample, temporary, {
+			nested: MySecondClass.deserialize(temporary.nested),
+		});
 
-    static deserialize(value: PropertiesOnly<MySample>): MySample {
-        const temporary = Atom.parse<MySample>(value);
-        const newSample = new MySample();
-
-        Object.assign(newSample, temporary, {
-            nested: MySecondClass.deserialize(temporary.nested),
-        });
-
-        return newSample;
-    }
+		return newSample;
+	}
 }
 
 class MySecondClass extends Atom<MySecondClass> {
+	public collection: Array<number> = [1, 2, 3, 4];
 
-    public collection: Array<number> = [1, 2, 3, 4];
+	static deserialize(value: PropertiesOnly<MySecondClass>): MySecondClass {
+		const temporary = Atom.parse(value);
+		const newSample = new MySecondClass();
 
-    static deserialize(
-        value: PropertiesOnly<MySecondClass>,
-    ): MySecondClass {
-        const temporary = Atom.parse(value);
-        const newSample = new MySecondClass();
-        Object.assign(newSample, temporary);
-        return newSample;
-    }
+		Object.assign(newSample, temporary);
+		return newSample;
+	}
 }
 
 const mySample = new MySample();
-
 await persist(mySample);
 const restored = await restore(mySample.identity, MySample);
 ```
-
-Thats all
