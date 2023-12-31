@@ -1,6 +1,9 @@
 export type Identity = string;
 export type LinkReference = string;
-export type DestructuredValue<T = unknown> = PropertiesOnly<T> | LinkReference;
+export type DestructuredValue<T = unknown> =
+	| PropertiesOnly<T>
+	| LinkReference
+	| DestructuredValue<T>[];
 
 export interface AtomClassWithDestructor<T = unknown> {
 	new (): T;

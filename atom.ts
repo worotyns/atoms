@@ -31,10 +31,19 @@ export abstract class Atom<T = unknown> implements IAtom<T> {
 
 		const temporaryObject = {} as Record<string, DestructuredValue<T>>;
 
-		for (const [key, value] of Object.entries(this)) {
-			if (isArray(value)) {
+		const items = () => {
+			if (this instanceof Map || this instanceof Set) {
+				return this.entries();
+			} else {
+				return Object.entries(this);
+			}
+		};
+
+		for (const [key, value] of items()) {
+			if (isArray(value) || value instanceof Set) {
 				const temporaryArray: Array<DestructuredValue<T>> = [];
-				for (const item of value) {
+
+				for (const item of Array.from(value)) {
 					if (Atom.isSerializable(item)) {
 						temporaryArray.push(
 							Atom.withIdentity(item.identity),
@@ -44,16 +53,31 @@ export abstract class Atom<T = unknown> implements IAtom<T> {
 						temporaryArray.push(item as DestructuredValue<T>);
 					}
 				}
-				temporaryObject[key] =
-					temporaryArray as unknown as DestructuredValue<T>;
+				temporaryObject[key] = temporaryArray;
 				continue;
 			}
 
 			if (Atom.isSerializable(value)) {
 				temporaryObject[key] = Atom.withIdentity(value.identity);
 				response.push(...value.destruct());
+			} else if (value instanceof Map) {
+				const temporaryMap = [] as Array<
+					[string, DestructuredValue<T>]
+				>;
+				for (const [key, val] of value.entries()) {
+					if (Atom.isSerializable(val)) {
+						temporaryMap.push([
+							key,
+							Atom.withIdentity(val.identity),
+						]);
+						response.push(...val.destruct());
+					} else {
+						temporaryMap.push([key, val]);
+					}
+				}
+				temporaryObject[key] = temporaryMap;
 			} else {
-				temporaryObject[key] = value as DestructuredValue<T>;
+				temporaryObject[key] = value;
 			}
 		}
 

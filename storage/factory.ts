@@ -28,25 +28,45 @@ function storeFactory(rootPath: string, options: PersistOptions) {
 			const temporary = await options.storageDriver.get(
 				relative(rootPath, path),
 			);
+
 			const rawObject: PropertiesOnly<T> = await options.serializer
 				.deserialize(temporary);
 
+			async function serializeArray(
+				value: unknown[],
+			): Promise<unknown[]> {
+				const temporaryArray = [];
+
+				for (const item of value as DestructuredValue[]) {
+					if (isArray(item)) {
+						temporaryArray.push(
+							await serializeArray(item as unknown[]),
+						);
+					} else if (
+						typeof item === 'string' && item.startsWith('<@')
+					) {
+						temporaryArray.push(
+							await options.serializer.deserialize(
+								await options.storageDriver.get(
+									relative(rootPath, item.slice(2)),
+								),
+							),
+						);
+					} else {
+						temporaryArray.push(item);
+					}
+				}
+
+				return temporaryArray;
+			}
+
+			// Always serialize object (extends of Atom) must be an object
 			for (const [key, value] of Object.entries(rawObject)) {
 				if (isArray(value)) {
-					const temporaryArray: Array<unknown> = [];
-					for (const item of value as DestructuredValue[]) {
-						if (typeof item === 'string' && item.startsWith('<@')) {
-							temporaryArray.push(
-								await options.serializer.deserialize(
-									await options.storageDriver.get(
-										relative(rootPath, item.slice(2)),
-									),
-								),
-							);
-						} else {
-							temporaryArray.push(item);
-						}
-					}
+					const temporaryArray: Array<unknown> = await serializeArray(
+						value as unknown[],
+					);
+
 					rawObject[key as keyof PropertiesOnly<T>] =
 						temporaryArray as unknown as PropertiesOnly<
 							T

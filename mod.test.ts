@@ -9,6 +9,13 @@ Deno.test('Serialize / deserialize test', async () => {
 		public readonly name: string = 'mati';
 		public readonly age: number = 33;
 		public collection: Array<number> = [1, 2, 3, 4];
+		public mySet: Set<MySecondClass> = new Set([
+			new MySecondClass(),
+		]);
+		public myMap: Map<string, MySecondClass> = new Map([
+			['first', new MySecondClass()],
+			['second', new MySecondClass()],
+		]);
 		public nested: MySecondClass = new MySecondClass();
 		public nestedCollection: MySecondChildClass[] = [
 			new MySecondChildClass(),
@@ -18,11 +25,22 @@ Deno.test('Serialize / deserialize test', async () => {
 		static deserialize(value: PropertiesOnly<MySample>): MySample {
 			const temporary = Atom.parse<MySample>(value);
 			const newSample = new MySample();
-
 			Object.assign(newSample, temporary, {
 				nested: MySecondClass.deserialize(temporary.nested),
 				nestedCollection: temporary.nestedCollection.map((item) =>
 					MySecondChildClass.deserialize(item)
+				),
+				mySet: new Set(
+					Array.from(temporary.mySet).map((item) =>
+						MySecondClass.deserialize(item)
+					),
+				),
+				myMap: new Map(
+					Array.from(temporary.myMap).map((
+						[key, value],
+					) => [key, MySecondClass.deserialize(value)]) as Array<
+						[string, MySecondClass]
+					>,
 				),
 			});
 
