@@ -96,8 +96,11 @@ export function createFs(rootPath: string) {
 }
 
 export function createMemory(rootPath = '/tmp') {
-	return storeFactory(rootPath, {
-		serializer: json,
-		storageDriver: memory,
-	});
+	return {
+		data: memory.__store,
+		...storeFactory(rootPath, {
+			serializer: json,
+			storageDriver: memory,
+		}),
+	};
 }
