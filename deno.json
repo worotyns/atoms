@@ -1,38 +1,38 @@
 {
-	"compilerOptions": {
-		"allowJs": false,
-		"lib": ["dom", "es2022", "deno.ns"],
-		"strict": true
-	},
-	"lint": {
-		"include": ["."],
-		"exclude": [],
-		"rules": {
-			"tags": ["recommended"],
-			"include": ["ban-untagged-todo"],
-			"exclude": ["no-unused-vars"]
-		}
-	},
-	"fmt": {
-		"useTabs": true,
-		"lineWidth": 80,
-		"indentWidth": 4,
-		"semiColons": true,
-		"singleQuote": true,
-		"proseWrap": "preserve",
-		"include": ["."],
-		"exclude": []
-	},
-	"lock": false,
-	"nodeModulesDir": true,
-	"test": {
-		"include": [],
-		"exclude": []
-	},
-	"tasks": {
-		"test": "deno test -A .",
-		"test:watch": "deno test -A --watch ."
-	},
-	"imports": {
-	}
+  "compilerOptions": {
+    "allowJs": false,
+    "lib": ["dom", "es2022", "deno.ns"],
+    "strict": true
+  },
+  "lint": {
+    "include": ["."],
+    "exclude": [],
+    "rules": {
+      "tags": ["recommended"],
+      "include": ["ban-untagged-todo"],
+      "exclude": ["no-unused-vars"]
+    }
+  },
+  "fmt": {
+    "useTabs": false,
+    "lineWidth": 80,
+    "indentWidth": 2,
+    "semiColons": true,
+    "singleQuote": true,
+    "proseWrap": "preserve",
+    "include": ["."],
+    "exclude": []
+  },
+  "lock": false,
+  "nodeModulesDir": true,
+  "test": {
+    "include": [],
+    "exclude": []
+  },
+  "tasks": {
+    "test": "deno test -A .",
+    "test:watch": "deno test -A --watch ."
+  },
+  "imports": {
+  }
 }
