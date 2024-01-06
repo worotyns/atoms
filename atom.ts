@@ -9,7 +9,7 @@ import { identity, isArray } from './utils.ts';
 export abstract class Atom<T = unknown> implements IAtom<T> {
   public readonly identity: Identity = identity();
 
-  static parse<T>(value: PropertiesOnly<T>): PropertiesOnly<T> {
+  static parse<T>(value: object): PropertiesOnly<T> {
     if (typeof value === 'string') {
       throw new Error('Cannot parse string');
     }

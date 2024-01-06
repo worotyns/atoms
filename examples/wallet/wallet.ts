@@ -2,7 +2,7 @@ import { Atom, PropertiesOnly } from 'atoms';
 import { Amount } from './amount.ts';
 
 export class Wallet extends Atom<Wallet> {
-  public readonly balance: Amount = Amount.zero();
+  public balance: Amount = Amount.zero();
 
   debit(amount: Amount) {
     if (this.balance.clone().subtract(amount).isUnderZero()) {
@@ -17,13 +17,16 @@ export class Wallet extends Atom<Wallet> {
     this.balance.add(amount);
   }
 
-  static deserialize(value: PropertiesOnly<Wallet>) {
-    const parsed = Atom.parse<Wallet>(value);
-
+  static deserialize(rawValue: PropertiesOnly<Wallet>) {
     return Object.assign(
       new Wallet(),
-      parsed,
-      { balance: Amount.zero().add(parsed.balance) },
+      rawValue,
+      { balance: Amount
+        .zero()
+        .add(
+          new Amount(rawValue.balance.value),
+        ) 
+      },
     );
   }
 }
