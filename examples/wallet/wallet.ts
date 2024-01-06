@@ -1,7 +1,4 @@
-import {
-  Atom,
-  PropertiesOnly,
-} from 'atoms';
+import { Atom, PropertiesOnly } from 'atoms';
 import { Amount } from './amount.ts';
 
 export class Wallet extends Atom<Wallet> {
