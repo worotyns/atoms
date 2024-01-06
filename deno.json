@@ -34,5 +34,7 @@
     "test:watch": "deno test -A --watch ."
   },
   "imports": {
+    "asserts": "https://deno.land/std@0.210.0/assert/mod.ts",
+    "atoms": "./mod.ts"
   }
 }
