@@ -33,22 +33,31 @@ export type PersistOptions = {
   serializer: Serializer;
 };
 
-type PickKeysByValue<Type, Value> = { [Key in keyof Type]: Type[Key] extends Value ? Key : never }[keyof Type];
+type PickKeysByValue<Type, Value> = {
+  [Key in keyof Type]: Type[Key] extends Value ? Key : never;
+}[keyof Type];
 type PickProperties<Type, Value> = Pick<Type, PickKeysByValue<Type, Value>>;
-// deno-lint-ignore ban-types
-type OmitFunctions<Type> = PickProperties<Type, Exclude<Type[keyof Type], Function>>;
+type OmitFunctions<Type> = PickProperties<
+  Type,
+  // deno-lint-ignore ban-types
+  Exclude<Type[keyof Type], Function>
+>;
 
-type ExtractMapType<T> = T extends Map<infer K, infer V> ? Array<[K, OmitFunctions<V>]> : T;
+type ExtractMapType<T> = T extends Map<infer K, infer V>
+  ? Array<[K, OmitFunctions<V>]>
+  : T;
 type ExtractSetType<T> = T extends Set<infer S> ? Array<OmitFunctions<S>> : T;
 type Properties<T> = {
-  [K in keyof T]: K extends PickKeysByValue<T, Map<unknown, unknown>> 
+  [K in keyof T]: K extends PickKeysByValue<T, Map<unknown, unknown>>
     ? Properties<ExtractMapType<T[K]>>
-    : K extends PickKeysByValue<T, Set<unknown>> 
+    : K extends PickKeysByValue<T, Set<unknown>>
       ? Properties<ExtractSetType<T[K]>>
-      : T[K] extends Record<string, Properties<infer Z>> 
-        ? Properties<T[K]>
-        : T[K];
+    : T[K] extends Record<string, Properties<infer Z>> ? Properties<T[K]>
+    : T[K];
 };
 
-// deno-lint-ignore ban-types
-export type PropertiesOnly<T> = PickProperties<Properties<T>, Exclude<Properties<T>[keyof Properties<T>], Function>>;
+export type PropertiesOnly<T> = PickProperties<
+  Properties<T>,
+  // deno-lint-ignore ban-types
+  Exclude<Properties<T>[keyof Properties<T>], Function>
+>;

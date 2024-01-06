@@ -21,11 +21,12 @@ export class Wallet extends Atom<Wallet> {
     return Object.assign(
       new Wallet(),
       rawValue,
-      { balance: Amount
-        .zero()
-        .add(
-          new Amount(rawValue.balance.value),
-        ) 
+      {
+        balance: Amount
+          .zero()
+          .add(
+            new Amount(rawValue.balance.value),
+          ),
       },
     );
   }
