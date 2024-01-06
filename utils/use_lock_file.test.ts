@@ -1,14 +1,14 @@
 import { assertRejects } from 'asserts';
 import { delay } from './delay.ts';
 import { createDummyLogger } from './logger.ts';
-import { withLockFile } from './with_lock_file.ts';
+import { useLockFile } from './use_lock_file.ts';
 
-Deno.test('withLockFile test', async () => {
+Deno.test('useLockFile test', async () => {
   const lockFile = '/tmp/' + Math.random().toString(36).substring(7);
 
   const dummyLogger = createDummyLogger();
 
-  const promise = withLockFile(
+  const promise = useLockFile(
     async () => {
       await delay(10);
     },
@@ -17,7 +17,7 @@ Deno.test('withLockFile test', async () => {
   );
 
   assertRejects(() =>
-    withLockFile(
+    useLockFile(
       async () => {
         await delay(5);
       },

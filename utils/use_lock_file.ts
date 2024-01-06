@@ -2,7 +2,7 @@ import { LockFile } from './lock_file.ts';
 import { WithLoggerOpts } from './logger.ts';
 import { Path } from '../interfaces.ts';
 
-export async function withLockFile(
+export async function useLockFile(
   callback: () => Promise<void>,
   lockFilePath: Path,
   opts: WithLoggerOpts = { logger: console },
