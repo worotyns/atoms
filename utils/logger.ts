@@ -1,3 +1,7 @@
+export interface WithLoggerOpts {
+  logger: Logger;
+}
+
 export interface Logger {
   debug: (...args: unknown[]) => void;
   info: (...args: unknown[]) => void;
