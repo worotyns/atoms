@@ -1,31 +1,10 @@
 import { assertEquals } from 'asserts';
 import { GracefullStop } from './gracefull_stop.ts';
-import { Logger } from './logger.ts';
+import { createDummyLogger, Logger } from './logger.ts';
+import { delay } from './delay.ts';
 
 Deno.test('utils/gracefull_stop.test.ts', async () => {
-  type DummyLogger = Logger & { logs: unknown[] };
-
-  const dummyLogger: DummyLogger = {
-    logs: [],
-    debug(...message: unknown[]) {
-      this.logs.push(...message);
-    },
-    info(...message: unknown[]) {
-      this.logs.push(...message);
-    },
-    log(...message: unknown[]) {
-      this.logs.push(...message);
-    },
-    warn(...message: unknown[]) {
-      this.logs.push(...message);
-    },
-    error(...message: unknown[]) {
-      this.logs.push(...message);
-    },
-  };
-
-  const delay = (ms: number) =>
-    new Promise((resolve) => setTimeout(resolve, ms));
+  const dummyLogger = createDummyLogger();
 
   const gracefullStop = GracefullStop.create(dummyLogger, {
     exitAfterStop: false,

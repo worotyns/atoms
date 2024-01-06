@@ -1,7 +1,7 @@
 import { Logger } from './logger.ts';
 
 interface GracefullStopOptions {
-  // for test purposes  
+  // for test purposes
   exitAfterStop: boolean;
 }
 
