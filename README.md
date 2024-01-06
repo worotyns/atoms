@@ -23,7 +23,7 @@ _restore_ and _persist_, and an interface to implement _IAtom_.
 
 - **Serializers:** Currently supports JSON serialization.
 
-## Example Codes
+## Example Codes (see /examples directory)
 
 ### Simple Structure (One File)
 
